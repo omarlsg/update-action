@@ -69,9 +69,15 @@ const readAction = async (actionId) => {
     const repository = await getRepository('Action')
 
     const ds_action = await getAction(actionId)
-    const sql_action=  await repository.findOne({ action_id: actionId });
+    const sql_action=  await repository.findOne({ action_id: actionId })
 
-    console.log(`${actionId}  ${ds_action.labels.hash}  ${sql_action.labels.hash}`)
+    //if(ds_action==null) throw Error("datastore action not found")
+    //if(sql_action==null) throw Error("sql action not found")
+
+    const msg_ds= ds_action?ds_action.labels.hash:ds_action
+    const msg_sql= sql_action?sql_action.labels.hash:sql_action
+
+    console.log(`${actionId}  ${msg_ds}  ${msg_sql}`)
   } catch (error) {
     console.log(error)
   }
