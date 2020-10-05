@@ -15,7 +15,15 @@ const processFile = async ({ file,to_do }) => {
   map(
     fileContent,
     ({ actionId, hash }) => {
-      return (to_do == "update"?updateAction(actionId, hash):readAction(actionId))
+      switch (to_do){
+        case "update":
+          return updateAction(actionId, hash)
+        case "check":
+          return readAction(actionId)
+        default:
+          console.log("Invalid td command");
+          return null
+      }
     },
     { concurrency: CONCURRENCY }
   )

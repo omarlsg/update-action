@@ -4,7 +4,10 @@
 
 ## Run
 
-    ./src/main.js -f input.csv
+    ./src/main.js -f input.csv -td [update / check]
+
+    * update: writes the hash for each actionId in the file
+    * check: read and logs the hash of each actionId in the file
 
 ## Input csv format
 
