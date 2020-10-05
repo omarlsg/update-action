@@ -58,9 +58,12 @@ const updateAction = async (actionId, hash) => {
 
 const readAction = async (actionId) => {
   try {
+    const repository = await getRepository('Action')
+
     const ds_action = await getAction(actionId)
     const sql_action=  await repository.findOne({ action_id: actionId });
-    console.log(`${actionId}  ${ds_action.labels.hash}  ${sql_action.labels}`)
+
+    console.log(`${actionId}  ${ds_action.labels.hash}  ${sql_action.labels.hash}`)
   } catch (error) {
     console.log(error)
   }
@@ -71,7 +74,7 @@ const executeActionUpdateOnMysql = async (action, hash) => {
   const repository = await getRepository('Action')
   await repository
     .createQueryBuilder()
-    .select()
+    .update()
     .set({ labels: { ...action.labels, hash } })
     .where('action_id = :actionId', { actionId })
     .execute()
