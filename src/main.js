@@ -6,6 +6,7 @@ const withErrorHandler = require('./shared/withErrorHandler')
 
 commander
   .requiredOption('-f, --file <file>', 'file name')
+  .requiredOption('-a, --action <action>', 'action to execute')
   .action(withErrorHandler(updateAction))
 
 commander.parseAsync(process.argv)

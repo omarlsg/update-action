@@ -8,14 +8,14 @@ const { DatastoreDb, MysqlDb } = require('../shared/db')
 
 const CONCURRENCY = 5
 
-const processFile = async ({ file }) => {
+const processFile = async ({ file,to_do }) => {
   await executeDBConnection()
   const fileContent = getFileContent(file)
 
   map(
     fileContent,
     ({ actionId, hash }) => {
-      return updateAction(actionId, hash)
+      return (to_do == "update"?updateAction(actionId, hash):readAction(actionId))
     },
     { concurrency: CONCURRENCY }
   )
@@ -55,12 +55,23 @@ const updateAction = async (actionId, hash) => {
   }
 }
 
+
+const readAction = async (actionId) => {
+  try {
+    const ds_action = await getAction(actionId)
+    const sql_action=  await repository.findOne({ action_id: actionId });
+    console.log(`${actionId}  ${ds_action.labels.hash}  ${sql_action.labels}`)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const executeActionUpdateOnMysql = async (action, hash) => {
   const actionId = action.action_id
   const repository = await getRepository('Action')
   await repository
     .createQueryBuilder()
-    .update()
+    .select()
     .set({ labels: { ...action.labels, hash } })
     .where('action_id = :actionId', { actionId })
     .execute()
