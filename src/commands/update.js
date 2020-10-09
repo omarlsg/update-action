@@ -75,8 +75,8 @@ const readAction = async (actionId, others) => {
     const ds_action = await getAction(actionId)
     const sql_action=  await repository.findOne({ action_id: actionId })
 
-    var msg_ds= ""
-    var msg_sql =""
+    var msg_ds = ""
+    var msg_sql = ""
     for (index = 0; index < fields.length; index++) { 
       msg_ds+= (ds_action?ds_action.labels[fields[index]]:ds_action) + "\t"
       msg_sql+= (sql_action?sql_action.labels[fields[index]]:sql_action) + "\t"
