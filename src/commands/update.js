@@ -19,7 +19,7 @@ const processFile = async ({ file,to_do }) => {
         case "update":
           return updateAction(actionId, others)
         case "check":
-          return readAction(actionId)
+          return readAction(actionId, others)
         default:
           console.log("Invalid td command");
           return null
@@ -66,17 +66,23 @@ const updateAction = async (actionId, others) => {
 }
 
 
-const readAction = async (actionId) => {
+const readAction = async (actionId, others) => {
   try {
     const repository = await getRepository('Action')
+
+    const fields = Object.keys(others)
 
     const ds_action = await getAction(actionId)
     const sql_action=  await repository.findOne({ action_id: actionId })
 
-    const msg_ds= ds_action?ds_action.labels.hash:ds_action
-    const msg_sql= sql_action?sql_action.labels.hash:sql_action
+    var msg_ds= ""
+    var msg_sql =""
+    for (index = 0; index < fields.length; index++) { 
+      msg_ds+= (ds_action?ds_action.labels[fields[index]]:ds_action) + "\t"
+      msg_sql+= (sql_action?sql_action.labels[fields[index]]:sql_action) + "\t"
+    }
 
-    console.log(`${actionId}  ${msg_ds}  ${msg_sql}`)
+    console.log(`${actionId}  ${msg_ds}||\t${msg_sql}`)
   } catch (error) {
     console.log(error)
   }
