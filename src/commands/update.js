@@ -14,10 +14,10 @@ const processFile = async ({ file,to_do }) => {
 
   map(
     fileContent,
-    ({ actionId, hash }) => {
+    ({ actionId, ...others }) => {
       switch (to_do){
         case "update":
-          return updateAction(actionId, hash)
+          return updateAction(actionId, others)
         case "check":
           return readAction(actionId)
         default:
@@ -51,14 +51,15 @@ const getFileContent = async filePath => {
   return csvParsed
 }
 
-const updateAction = async (actionId, hash) => {
+const updateAction = async (actionId, others) => {
   try {
     const action = await getAction(actionId)
     
-    await executeActionUpdateOnMysql(action, hash)
-    await executeActionUpdateOnDs(action, hash)
+    await executeActionUpdateOnMysql(action, others)
+    await executeActionUpdateOnDs(action, others)
     console.log(`Update both actions successfully: ${actionId}`)
   } catch (error) {
+    console.log(`Update action error: ${error.message} actionId: ${actionId}`)
     console.log(error)
   }
 }
@@ -80,18 +81,21 @@ const readAction = async (actionId) => {
   }
 }
 
-const executeActionUpdateOnMysql = async (action, hash) => {
+const executeActionUpdateOnMysql = async (action, others) => {
   const actionId = action.action_id
   const repository = await getRepository('Action')
+  const entity = { labels: { ...action.labels, ...others } }
+  if (entity.labels.reverseInitiated) 
+    entity.labels.reverseInitiated = entity.labels.reverseInitiated === 'true' ? true : false
   await repository
     .createQueryBuilder()
     .update()
-    .set({ labels: { ...action.labels, hash } })
+    .set(entity)
     .where('action_id = :actionId', { actionId })
     .execute()
 }
 
-const executeActionUpdateOnDs = async (action, hash) => {
+const executeActionUpdateOnDs = async (action, others) => {
   const key = action[DatastoreDb.KEY]
   const entity = {
     key,
@@ -99,10 +103,11 @@ const executeActionUpdateOnDs = async (action, hash) => {
       ...action,
       labels: {
         ...action.labels,
-        hash
+        ...others
       }
     }
   }
+  if (entity.data.labels.reverseInitiated) entity.data.labels.reverseInitiated = entity.data.labels.reverseInitiated === 'true' ? true : false
   await DatastoreDb.update(entity)
 }
 
