@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-require('dotenv').config({path: ".env.prd"})
+require('dotenv').config({path: ".env.tst"})
 const commander = require('commander')
 const updateAction = require('./commands/update')
 const withErrorHandler = require('./shared/withErrorHandler')

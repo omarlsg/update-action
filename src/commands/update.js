@@ -32,9 +32,10 @@ const processFile = async ({ file,to_do }) => {
 const executeDBConnection = async () => {
   try {
     const ds = DatastoreDb
+    console.log('Connect Datastore successfully')
     const ms = await MysqlDb
+    console.log('Connect mySQL successfully')
 
-    console.log('Connect DBs successfully')
     return { ds, ms }
   } catch (error) {
     console.error(`Error connecting db ${error.message}`)
