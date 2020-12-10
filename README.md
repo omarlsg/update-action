@@ -4,7 +4,7 @@
 
 ## Run
 
-    ./src/main.js -f input.csv -td [update / check]
+    node src/main -f input.csv -td [update / check]
     
     ex:
     node src/main -f file.csv -td check
@@ -23,3 +23,5 @@
     MYSQL_PASSWORD=
     MYSQL_HOST=
     MYSQL_DATABASE=
+    GCLOUD_PROJECT=
+    GOOGLE_APPLICATION_CREDENTIALS=
