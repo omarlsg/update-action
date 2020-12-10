@@ -92,6 +92,11 @@ const executeActionUpdateOnMysql = async (action, others) => {
   const actionId = action.action_id
   const repository = await getRepository('Action')
   const entity = { labels: { ...action.labels, ...others } }
+  
+  if(others.tx_ref){
+    entity.transferId=others.tx_ref
+  }
+
   if (entity.labels.reverseInitiated) 
     entity.labels.reverseInitiated = entity.labels.reverseInitiated === 'true' ? true : false
   await repository
