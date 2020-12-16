@@ -23,7 +23,7 @@
 
 ## Input csv format for target
     transferId,actionId,target
-    ocBYM3IeT6huWq7Ac,914e0e4d-a0ae-4449-acbd-830d96544a37,'{""signer"": {""handle"": ""wZW9LYsaKGuJjR4YXH3Uu28zzYxzMnkR1r"", ...}'
+    ocBYM3IeT6huWq7Ac,914e0e4d-a0ae-4449-acbd-830d96544a37,"{""signer"": {""handle"": ""wZW9LYsaKGuJjR4YXH3Uu28zzYxzMnkR1r"", ...}"
 
 ## Environment variables
 

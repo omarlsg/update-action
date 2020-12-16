@@ -16,7 +16,10 @@ const processFile = async ({ file,to_do }) => {
     fileContent,
     ({ transferId,actionId, ...newSnapshot }) => {
       newSnapshot.target=JSON.parse(newSnapshot.target)
-      
+
+      //delete bigquery garbage 
+      delete newSnapshot.target.signer.labels.__key__;
+
       switch (to_do){
         case "update":
           updateTransfer(transferId,newSnapshot)
@@ -50,8 +53,7 @@ const getFileContent = async filePath => {
   const readFile = util.promisify(fs.readFile)
   const fileContent = await readFile(filePath, { encoding: 'utf8' })
   const csvParsed = csv.parse(fileContent, {
-    columns: true,
-    quote:"'"
+    columns: true
   })
   return csvParsed
 }
@@ -111,7 +113,7 @@ const executeActionUpdateOnMysql = async (action, newSnapshot) => {
     entity.targetBank=newSnapshot.target.signer.labels.bankName
     entity.targetSigner=newSnapshot.target.signer.handle
     entity.targetWallet=newSnapshot.target.wallet.handle
-    entity.target=newSnapshot.target.wallet.handle
+    entity.target=newSnapshot.target.wallet.handle || newSnapshot.target.signer.handle
   }
 
   await repository
@@ -132,7 +134,7 @@ const executeTransferUpdateOnMysql = async (transfer, newSnapshot) => {
     entity.targetBank=newSnapshot.target.signer.labels.bankName
     entity.targetSigner=newSnapshot.target.signer.handle
     entity.targetWallet=newSnapshot.target.wallet.handle
-    entity.target=newSnapshot.target.wallet.handle
+    entity.target=newSnapshot.target.wallet.handle || newSnapshot.target.signer.handle
   }
 
   await repository
