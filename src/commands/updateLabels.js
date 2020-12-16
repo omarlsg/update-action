@@ -14,12 +14,12 @@ const processFile = async ({ file,to_do }) => {
 
   map(
     fileContent,
-    ({ actionId, ...others }) => {
+    ({ actionId, ...newLabels }) => {
       switch (to_do){
         case "update":
-          return updateAction(actionId, others)
+          return updateAction(actionId, newLabels)
         case "check":
-          return readAction(actionId, others)
+          return readAction(actionId, newLabels)
         default:
           console.log("Invalid td command");
           return null
@@ -52,12 +52,12 @@ const getFileContent = async filePath => {
   return csvParsed
 }
 
-const updateAction = async (actionId, others) => {
+const updateAction = async (actionId, labels) => {
   try {
     const action = await getAction(actionId)
     
-    await executeActionUpdateOnMysql(action, others)
-    await executeActionUpdateOnDs(action, others)
+    await executeActionUpdateOnMysql(action, labels)
+    await executeActionUpdateOnDs(action, labels)
     console.log(`Update both actions successfully: ${actionId}`)
   } catch (error) {
     console.log(`Update action error: ${error.message} actionId: ${actionId}`)
@@ -66,11 +66,11 @@ const updateAction = async (actionId, others) => {
 }
 
 
-const readAction = async (actionId, others) => {
+const readAction = async (actionId, labels) => {
   try {
     const repository = await getRepository('Action')
 
-    const fields = Object.keys(others)
+    const fields = Object.keys(labels)
 
     const ds_action = await getAction(actionId)
     const sql_action=  await repository.findOne({ action_id: actionId })
@@ -88,13 +88,13 @@ const readAction = async (actionId, others) => {
   }
 }
 
-const executeActionUpdateOnMysql = async (action, others) => {
+const executeActionUpdateOnMysql = async (action, newLabels) => {
   const actionId = action.action_id
   const repository = await getRepository('Action')
-  const entity = { labels: { ...action.labels, ...others } }
+  const entity = { labels: { ...action.labels, ...newLabels } }
   
-  if(others.tx_ref){
-    entity.transferId=others.tx_ref
+  if(newLabels.tx_ref){
+    entity.transferId=newLabels.tx_ref
   }
 
   if (entity.labels.reverseInitiated) 
@@ -107,7 +107,7 @@ const executeActionUpdateOnMysql = async (action, others) => {
     .execute()
 }
 
-const executeActionUpdateOnDs = async (action, others) => {
+const executeActionUpdateOnDs = async (action, newLabels) => {
   const key = action[DatastoreDb.KEY]
   const entity = {
     key,
@@ -115,7 +115,7 @@ const executeActionUpdateOnDs = async (action, others) => {
       ...action,
       labels: {
         ...action.labels,
-        ...others
+        ...newLabels
       }
     }
   }

@@ -1,3 +1,2 @@
-actionId,tx_ref
-2d0efe92-152b-4f7e-93f3-bf50cc18f56e,idiwDwPEam2ypP9bb
-ac657ced-3f33-4e57-935f-3e1f554099b6,VYOcw2UGw4qf1eUOE
+transferId,actionId,target
+ocBYM3IeT6huWq7Ac,42b84dbd-91f1-43bc-b72e-3ce197318a88,'{""signer"": {""handle"": ""wi16K6TYcxAKef8YK4F12z7xLMLsKYuwWP"", ""labels"": {""mobile"": ""573120080001"", ""created"": ""2020-11-04T09:58:15-05:00"", ""bankName"": ""Banco Amarillo"", ""lastName"": ""ACH"", ""createdBy"": ""UFK6Y1E9d8Fqqdoz28bH"", ""firstName"": ""Test User"", ""proprietary"": ""CC"", ""routerReference"": ""$bancoamarillo"", ""bankAccountNumber"": ""SVG"", ""countryOfResidence"": ""COL""}}, ""wallet"": {""handle"": ""$573120080001"", ""labels"": {""type"": ""PERSON"", ""created"": ""2020-11-04T09:58:24-05:00""}, ""signer"": [""wi16K6TYcxAKef8YK4F12z7xLMLsKYuwWP""], ""default"": ""wi16K6TYcxAKef8YK4F12z7xLMLsKYuwWP""}}'
