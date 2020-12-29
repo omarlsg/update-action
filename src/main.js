@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 require('dotenv').config({path: ".env.prd"})
 const commander = require('commander')
-const updateTarget = require('./commands/updateTarget')
+const updateSnapshot = require('./commands/updateSnapshot')
 const updateLabels = require('./commands/updateLabels')
 const withErrorHandler = require('./shared/withErrorHandler')
 
@@ -12,9 +12,9 @@ commander
   .action(withErrorHandler(updateLabels))
 
 commander
-  .command('target')
+  .command('snapshot')
   .requiredOption('-f, --file <file>', 'file name')
   .requiredOption('-td, --to_do <action>', 'action to execute (check/update)')
-  .action(withErrorHandler(updateTarget))
+  .action(withErrorHandler(updateSnapshot))
 
 commander.parseAsync(process.argv)

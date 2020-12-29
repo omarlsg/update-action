@@ -15,17 +15,24 @@ const processFile = async ({ file,to_do }) => {
   map(
     fileContent,
     ({ transferId,actionId, ...newSnapshot }) => {
-      newSnapshot.target=JSON.parse(newSnapshot.target)
+      if(newSnapshot.target){
+        newSnapshot.target=JSON.parse(newSnapshot.target)
+        //delete bigquery garbage 
+        delete newSnapshot.target.signer.labels.__key__;
+      }
 
-      //delete bigquery garbage 
-      delete newSnapshot.target.signer.labels.__key__;
+      if(newSnapshot.source){
+        newSnapshot.source=JSON.parse(newSnapshot.source)
+        //delete bigquery garbage 
+        delete newSnapshot.source.signer.labels.__key__;
+      }
 
       switch (to_do){
         case "update":
           updateTransfer(transferId,newSnapshot)
           return updateAction(actionId, newSnapshot)
         case "check":
-          return readAction(actionId)
+          return readAction(actionId,newSnapshot)
         default:
           console.log("Invalid -td command");
           return null
@@ -84,7 +91,7 @@ const updateTransfer = async (transferId, newSnapshot) => {
 }
 
 
-const readAction = async (actionId) => {
+const readAction = async (actionId,newSnapshot) => {
   try {
     const repository = await getRepository('Action')
 
@@ -94,8 +101,15 @@ const readAction = async (actionId) => {
     var msg_ds = ""
     var msg_sql = ""
     
-    msg_ds+= (ds_action?ds_action.snapshot.target.signer.handle:ds_action) + "\t"
-    msg_sql+= (sql_action?sql_action.snapshot.target.signer.handle:sql_action) + "\t"
+    if(newSnapshot.target){
+      msg_ds+= (ds_action?ds_action.snapshot.target.signer.handle:ds_action) + "\t"
+      msg_sql+= (sql_action?sql_action.snapshot.target.signer.handle:sql_action) + "\t"
+    }
+
+    if(newSnapshot.source){
+      msg_ds+= (ds_action?ds_action.snapshot.source.signer.handle:ds_action) + "\t"
+      msg_sql+= (sql_action?sql_action.snapshot.source.signer.handle:sql_action) + "\t"
+    }
 
     console.log(`${actionId}  ${msg_ds}||\t${msg_sql}`)
   } catch (error) {
@@ -103,10 +117,8 @@ const readAction = async (actionId) => {
   }
 }
 
-const executeActionUpdateOnMysql = async (action, newSnapshot) => {
-  const actionId = action.action_id
-  const repository = await getRepository('Action')
-  const entity = { snapshot: { ...action.snapshot, ...newSnapshot } }
+const getModifiedSQLEntity =(originalEntity,newSnapshot) => {
+  const entity = { snapshot: { ...originalEntity.snapshot, ...newSnapshot } }
   
   if(newSnapshot.target){
     entity.targetBankBicfi=newSnapshot.target.signer.labels.bankBicfi
@@ -115,6 +127,22 @@ const executeActionUpdateOnMysql = async (action, newSnapshot) => {
     entity.targetWallet=newSnapshot.target.wallet.handle
     entity.target=newSnapshot.target.wallet.handle || newSnapshot.target.signer.handle
   }
+
+  if(newSnapshot.source){
+    entity.sourceBankBicfi=newSnapshot.source.signer.labels.bankBicfi
+    entity.sourceBank=newSnapshot.source.signer.labels.bankName
+    entity.sourceSigner=newSnapshot.source.signer.handle
+    entity.sourceWallet=newSnapshot.source.wallet.handle
+    entity.source=newSnapshot.source.wallet.handle || newSnapshot.source.signer.handle
+  }
+
+  return entity
+}
+
+const executeActionUpdateOnMysql = async (action, newSnapshot) => {
+  const actionId = action.action_id
+  const repository = await getRepository('Action')
+  const entity = getModifiedSQLEntity(action,newSnapshot)
 
   await repository
     .createQueryBuilder()
@@ -127,15 +155,7 @@ const executeActionUpdateOnMysql = async (action, newSnapshot) => {
 const executeTransferUpdateOnMysql = async (transfer, newSnapshot) => {
   const transferId = transfer.transferId
   const repository = await getRepository('Transfer')
-  const entity = { snapshot: { ...transfer.snapshot, ...newSnapshot } }
-  
-  if(newSnapshot.target){
-    entity.targetBankBicfi=newSnapshot.target.signer.labels.bankBicfi
-    entity.targetBank=newSnapshot.target.signer.labels.bankName
-    entity.targetSigner=newSnapshot.target.signer.handle
-    entity.targetWallet=newSnapshot.target.wallet.handle
-    entity.target=newSnapshot.target.wallet.handle || newSnapshot.target.signer.handle
-  }
+  const entity = getModifiedSQLEntity(transfer,newSnapshot)
 
   await repository
     .createQueryBuilder()
@@ -151,13 +171,18 @@ const executeActionUpdateOnDs = async (action, newSnapshot) => {
     key,
     data: {
       ...action,
-      target:newSnapshot.target.wallet.handle,
       snapshot: {
         ...action.snapshot,
         ...newSnapshot
       }
     }
   }
+  if(newSnapshot.target)
+    entity.target=newSnapshot.target.wallet.handle
+  
+  if(newSnapshot.source)
+    entity.source=newSnapshot.source.wallet.handle
+
   await DatastoreDb.update(entity)
 }
 
