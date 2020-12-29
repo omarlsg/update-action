@@ -4,11 +4,12 @@
 
 ## Run
 
-    node src/main -f [snapshot/labels] input.csv -td [update / check]
+    node src/main -f [snapshot/labels/info] input.csv -td [update / check]
     
     ex:
     node src/main snapshot -f file.csv -td check
     node src/main labels -f file.csv -td update
+    node src/main info -f file.csv -o output.csv
 
     - snapshot command updates all the information of the source/target of the main action and the transfer
     - labels command updates specific labels in the actions
