@@ -54,10 +54,15 @@ const getFileContent = async filePath => {
 
 const updateAction = async (actionId, labels) => {
   try {
-    const action = await getAction(actionId)
-    
+
+    let action = await getActionDS(actionId)
+    if (action) {
+      await executeActionUpdateOnDs(action, labels)
+    }
+
+    action = await getActionSQL(actionId)
     await executeActionUpdateOnMysql(action, labels)
-    await executeActionUpdateOnDs(action, labels)
+
     console.log(`Update both actions successfully: ${actionId}`)
   } catch (error) {
     console.log(`Update action error: ${error.message} actionId: ${actionId}`)
@@ -68,12 +73,10 @@ const updateAction = async (actionId, labels) => {
 
 const readAction = async (actionId, labels) => {
   try {
-    const repository = await getRepository('Action')
-
     const fields = Object.keys(labels)
 
-    const ds_action = await getAction(actionId)
-    const sql_action=  await repository.findOne({ action_id: actionId })
+    const ds_action = await getActionDS(actionId)
+    const sql_action=  await getActionSQL(actionId)
 
     var msg_ds = ""
     var msg_sql = ""
@@ -123,9 +126,15 @@ const executeActionUpdateOnDs = async (action, newLabels) => {
   await DatastoreDb.update(entity)
 }
 
-const getAction = async actionId => {
+const getActionDS = async actionId => {
   const key = DatastoreDb.key(['Action', actionId])
   const [action] = await DatastoreDb.get(key)
+  return action  
+}
+
+const getActionSQL = async actionId => {
+  const repository = getRepository('Action')
+  const action = await repository.findOne({ action_id: actionId })
   return action  
 }
 
